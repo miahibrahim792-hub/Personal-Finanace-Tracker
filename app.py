@@ -140,56 +140,86 @@ def delete_transaction():
 
 def view_balance():
     print("\n--- View Balance ---")
-    total_income = sum(t['amount'] for t in transactions if t['type'] == 'income')
-    total_expense = sum(t['amount'] for t in transactions if t['type'] == 'expense')
+
+    connection = sqlite3.connect("finance.db")
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT SUM(amount) FROM transactions WHERE type = 'income'")
+    total_income = cursor.fetchone()[0] or 0
+
+    cursor.execute("SELECT SUM(amount) FROM transactions WHERE type = 'expense'")
+    total_expense = cursor.fetchone()[0] or 0
+
     balance = total_income - total_expense
 
     print(f"Total Income: £{total_income:.2f}")
     print(f"Total Expense: £{total_expense:.2f}")
     print(f"Current Balance: £{balance:.2f}")
 
+    connection.close()
+
+    if total_income is None:
+        total_income = 0
+    if total_expense is None:
+        total_expense = 0
+    balance = total_income - total_expense
+    print(f"Total Income: £{total_income:.2f}")
+    print(f"Total Expense: £{total_expense:.2f}")
+    print(f"Current Balance: £{balance:.2f}")
 
 def view_transactions_by_category():
     print("\n--- View Transactions by Category ---")
-    if not transactions:
-        print("No transactions found.")
-        return
 
-    category = input("Enter category to filter by: ").strip()
-    filtered_transactions = [t for t in transactions if t['category'].lower() == category.lower()]
+    category = input("Enter category to filter by: ").strip().lower()
 
-    if not filtered_transactions:
+    connection = sqlite3.connect("finance.db")
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT * FROM transactions
+        WHERE LOWER(TRIM(category)) = LOWER(TRIM(?))
+    """, (category,))
+
+    rows = cursor.fetchall()
+    connection.close()
+
+    if not rows:
         print(f"No transactions found for category '{category}'.")
         return
 
-    for i, transaction in enumerate(filtered_transactions, start=1):
+    for i, row in enumerate(rows, start=1):
         print(f"\nTransaction {i}:")
-        print(f"Type: {transaction['type']}")
-        print(f"Amount: £{transaction['amount']:.2f}")
-        print(f"Category: {transaction['category']}")
-        print(f"Description: {transaction['description']}")
-        print(f"Timestamp: {transaction.get('timestamp','Unknown')}")
+        print(f"Type: {row[1]}")
+        print(f"Amount: £{row[2]:.2f}")
+        print(f"Category: {row[3]}")
+        print(f"Description: {row[4]}")
+        print(f"Timestamp: {row[5]}")
 
 def view_spending_by_category():
     print("\n--- View Spending by Category ---")
-    if not transactions:
-        print("No transactions found.")
-        return
 
-    category_totals = {}
-    for transaction in transactions:
-        if transaction['type'] == 'expense':
-            category = transaction['category'].strip().title()
-            amount = transaction['amount']
-            category_totals[category] = category_totals.get(category, 0) + amount
+    connection = sqlite3.connect("finance.db")
+    cursor = connection.cursor()
 
-    if not category_totals:
+    cursor.execute("""
+        SELECT LOWER(TRIM(category)), SUM(amount)
+        FROM transactions
+        WHERE type = 'expense'
+        GROUP BY LOWER(TRIM(category))
+        ORDER BY SUM(amount) DESC
+    """)
+
+    rows = cursor.fetchall()
+    connection.close()
+
+    if not rows:
         print("No expense transactions found.")
         return
 
     print("\nSpending by Category:")
-    for category, total in category_totals.items():
-        print(f"{category}: £{total:.2f}")  
+
+    for category, total in rows:
+        print(f"Category: {category}, Total Spending: £{total:.2f}")
 
 def main():
     create_database()
