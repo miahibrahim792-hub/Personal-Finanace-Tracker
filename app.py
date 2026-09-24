@@ -1,21 +1,44 @@
 
-import json
+import sqlite3
 from datetime import datetime
 
+transactions = []  # Global variable to store transactions
 
-transactions = []
+def create_database():
+    connection = sqlite3.connect("finance.db")
+    cursor = connection.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT NOT NULL,
+            amount REAL NOT NULL,
+            category TEXT NOT NULL,
+            description TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    connection.commit()
+    connection.close()
 
-def save_transactions():
-    with open("transactions.json", "w") as file:
-        json.dump(transactions, file, indent=4)
 
 def load_transactions():
     global transactions
-    try:
-        with open("transactions.json", "r") as file:
-            transactions = json.load(file)
-    except FileNotFoundError:
-        transactions = []
+    transactions = []
+    connection = sqlite3.connect("finance.db")
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM transactions")
+    rows = cursor.fetchall()
+    for row in rows:
+        transaction = {
+            "id": row[0],
+            "type": row[1],
+            "amount": row[2],
+            "category": row[3],
+            "description": row[4],
+            "timestamp": row[5]
+        }
+        transactions.append(transaction)
+    connection.close()
 
 def add_transaction():
     print("\n--- Add Transaction ---")
@@ -46,34 +69,48 @@ def add_transaction():
     print(f"Description: {description}")
     print(f"Timestamp: {timestamp}")
 
-    transaction = {
-        "type": transaction_type,
-        "amount": amount,
-        "category": category,
-        "description": description,
-        "timestamp": timestamp
-    }
-    transactions.append(transaction)
-    save_transactions()
+    connection = sqlite3.connect("finance.db")
+    cursor = connection.cursor()
+    cursor.execute("""
+        INSERT INTO transactions (type, amount, category, description, timestamp)
+        VALUES (?, ?, ?, ?, ?)
+    """, (transaction_type, amount, category, description, timestamp))
+    connection.commit()
+    connection.close()
+    load_transactions()  # Reload transactions after adding a new one
+
+
 
 def view_transactions():
     print("\n--- View Transactions ---")
-    if not transactions:
+    connection = sqlite3.connect("finance.db")
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM transactions")
+    rows = cursor.fetchall()
+    connection.close()
+
+    if not rows:
         print("No transactions found.")
         return
 
-    for i, transaction in enumerate(transactions, start=1):
+    for i, row in enumerate(rows, start=1):
         print(f"\nTransaction {i}:")
-        print(f"Type: {transaction['type']}")
-        print(f"Amount: £{transaction['amount']:.2f}")
-        print(f"Category: {transaction['category']}")
-        print(f"Description: {transaction['description']}")
-        print(f"Timestamp: {transaction.get('timestamp','Unknown')}")
+        print(f"Type: {row[1]}")
+        print(f"Amount: £{row[2]:.2f}")
+        print(f"Category: {row[3]}")
+        print(f"Description: {row[4]}")
+        print(f"Timestamp: {row[5]}")
 
 
 def delete_transaction():
     print("\n--- Delete Transaction ---")
-    if not transactions:
+    connection = sqlite3.connect("finance.db")
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM transactions")
+    rows = cursor.fetchall()
+    connection.close()
+
+    if not rows:
         print("No transactions found.")
         return
 
@@ -84,13 +121,19 @@ def delete_transaction():
             if index == 0:
                 print("Deletion cancelled.")
                 return
-            if 1 <= index <= len(transactions):
-                transactions.pop(index - 1)
-                save_transactions()
+            if 1 <= index <= len(rows):
+                transaction_id = rows[index - 1][0]
+                connection = sqlite3.connect("finance.db")
+                cursor = connection.cursor()
+
+                cursor.execute("DELETE FROM transactions WHERE id = ?", (transaction_id,))
+                connection.commit()
+                connection.close()
+                load_transactions()  # Reload transactions after deletion
                 print(f"Transaction {index} deleted successfully!")
                 return
             else:
-                print(f"Invalid transaction number. Please enter a number between 1 and {len(transactions)}.")
+                print(f"Invalid transaction number. Please enter a number between 1 and {len(rows)}.")
         except ValueError:
             print("Invalid input. Please enter a valid transaction number.") 
 
@@ -149,7 +192,9 @@ def view_spending_by_category():
         print(f"{category}: £{total:.2f}")  
 
 def main():
+    create_database()
     load_transactions()
+    
     print("=== Personal Finance Tracker ===")
     while True:
         print("\n1. Add Transaction")
