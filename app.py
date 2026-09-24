@@ -85,7 +85,7 @@ def delete_transaction():
                 print("Deletion cancelled.")
                 return
             if 1 <= index <= len(transactions):
-                deleted_transaction = transactions.pop(index - 1)
+                transactions.pop(index - 1)
                 save_transactions()
                 print(f"Transaction {index} deleted successfully!")
                 return
@@ -106,6 +106,47 @@ def view_balance():
     print(f"Current Balance: £{balance:.2f}")
 
 
+def view_transactions_by_category():
+    print("\n--- View Transactions by Category ---")
+    if not transactions:
+        print("No transactions found.")
+        return
+
+    category = input("Enter category to filter by: ").strip()
+    filtered_transactions = [t for t in transactions if t['category'].lower() == category.lower()]
+
+    if not filtered_transactions:
+        print(f"No transactions found for category '{category}'.")
+        return
+
+    for i, transaction in enumerate(filtered_transactions, start=1):
+        print(f"\nTransaction {i}:")
+        print(f"Type: {transaction['type']}")
+        print(f"Amount: £{transaction['amount']:.2f}")
+        print(f"Category: {transaction['category']}")
+        print(f"Description: {transaction['description']}")
+        print(f"Timestamp: {transaction.get('timestamp','Unknown')}")
+
+def view_spending_by_category():
+    print("\n--- View Spending by Category ---")
+    if not transactions:
+        print("No transactions found.")
+        return
+
+    category_totals = {}
+    for transaction in transactions:
+        if transaction['type'] == 'expense':
+            category = transaction['category'].strip().title()
+            amount = transaction['amount']
+            category_totals[category] = category_totals.get(category, 0) + amount
+
+    if not category_totals:
+        print("No expense transactions found.")
+        return
+
+    print("\nSpending by Category:")
+    for category, total in category_totals.items():
+        print(f"{category}: £{total:.2f}")  
 
 def main():
     load_transactions()
@@ -114,8 +155,10 @@ def main():
         print("\n1. Add Transaction")
         print("2. View Transactions")
         print("3. View Balance")
-        print("4. Delete Transaction")
-        print("5. Exit")
+        print("4. View Transactions by Category")
+        print("5. View Spending by Category")
+        print("6. Delete Transaction")
+        print("7. Exit")
         choice = input("Enter your choice: ")
 
         if choice == "1":
@@ -125,8 +168,12 @@ def main():
         elif choice == "3":
             view_balance()
         elif choice == "4":
-            delete_transaction()
+            view_transactions_by_category()
         elif choice == "5":
+            view_spending_by_category()
+        elif choice == "6":
+            delete_transaction()
+        elif choice == "7":
             print("Exiting...")
             break
         else:
