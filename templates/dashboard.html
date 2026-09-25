@@ -2,18 +2,25 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Personal Finance Tracker</title>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Personal Finance Tracker
+    </title>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
     >
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 
@@ -21,56 +28,97 @@
 
     <div class="container">
 
-        <!-- =========================
-             TOP BAR
-        ========================== -->
+
+        <!-- TOP BAR -->
 
         <div class="top-bar">
 
-            <h1>Personal Finance Tracker</h1>
+            <h1>
+                Personal Finance Tracker
+            </h1>
 
-            <button
-                id="theme-toggle"
-                class="theme-toggle"
-                type="button"
-            >
-                Dark Mode
-            </button>
+
+            <div class="top-bar-actions">
+
+                <span class="username">
+                    {{ username }}
+                </span>
+
+
+                <button
+                    id="theme-toggle"
+                    class="theme-toggle"
+                    type="button"
+                >
+                    Dark Mode
+                </button>
+
+
+                <a
+                    href="{{ url_for('logout') }}"
+                    class="logout-button"
+                >
+                    Logout
+                </a>
+
+            </div>
 
         </div>
 
 
-        <!-- =========================
-             SUMMARY CARDS
-        ========================== -->
+
+        <!-- SUMMARY CARDS -->
 
         <div class="summary-cards">
 
             <div class="card">
-                <h2>Current Balance</h2>
-                <p>£{{ "%.2f"|format(balance) }}</p>
+
+                <h2>
+                    Current Balance
+                </h2>
+
+                <p>
+                    £{{ "%.2f"|format(balance) }}
+                </p>
+
             </div>
 
-            <div class="card">
-                <h2>Total Income</h2>
-                <p>£{{ "%.2f"|format(total_income) }}</p>
-            </div>
 
             <div class="card">
-                <h2>Total Expenses</h2>
-                <p>£{{ "%.2f"|format(total_expense) }}</p>
+
+                <h2>
+                    Total Income
+                </h2>
+
+                <p>
+                    £{{ "%.2f"|format(total_income) }}
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2>
+                    Total Expenses
+                </h2>
+
+                <p>
+                    £{{ "%.2f"|format(total_expense) }}
+                </p>
+
             </div>
 
         </div>
 
 
-        <!-- =========================
-             SPENDING BY CATEGORY
-        ========================== -->
+
+        <!-- SPENDING BY CATEGORY -->
 
         <h2 class="section-title">
             Spending by Category
         </h2>
+
 
         <div class="card chart-card">
 
@@ -79,13 +127,13 @@
         </div>
 
 
-        <!-- =========================
-             MONTHLY ANALYTICS
-        ========================== -->
+
+        <!-- MONTHLY INCOME / EXPENSE -->
 
         <h2 class="section-title">
             Monthly Income vs Expenses
         </h2>
+
 
         <div class="card monthly-chart-card">
 
@@ -94,13 +142,13 @@
         </div>
 
 
-        <!-- =========================
-             ADD TRANSACTION
-        ========================== -->
+
+        <!-- ADD TRANSACTION -->
 
         <h2 class="section-title">
             Add Transaction
         </h2>
+
 
         <form
             action="/add"
@@ -108,7 +156,10 @@
             class="transaction-form"
         >
 
-            <select name="type" required>
+            <select
+                name="type"
+                required
+            >
 
                 <option value="expense">
                     Expense
@@ -152,80 +203,145 @@
 
         </form>
 
-        <!-- Transaction Filters -->
-<h2 class="section-title">Find Transactions</h2>
 
-<form
-    action="{{ url_for('home') }}"
-    method="GET"
-    class="filter-form"
->
 
-    <input
-        type="text"
-        name="search"
-        placeholder="Search category or description..."
-        value="{{ search }}"
-    >
+        <!-- FILTERS -->
 
-    <select name="type">
+        <h2 class="section-title">
+            Find Transactions
+        </h2>
 
-        <option value="">
-            All Types
-        </option>
 
-        <option
-            value="income"
-            {% if selected_type == "income" %}selected{% endif %}
+        <form
+            action="{{ url_for('home') }}"
+            method="GET"
+            class="filter-form"
         >
-            Income
-        </option>
 
-        <option
-            value="expense"
-            {% if selected_type == "expense" %}selected{% endif %}
-        >
-            Expense
-        </option>
+            <!-- SEARCH -->
 
-    </select>
-
-    <select name="category">
-
-        <option value="">
-            All Categories
-        </option>
-
-        {% for category in categories %}
-
-        <option
-            value="{{ category }}"
-            {% if selected_category.lower() == category.lower() %}selected{% endif %}
-        >
-            {{ category }}
-        </option>
-
-        {% endfor %}
-
-    </select>
-
-    <button type="submit">
-        Filter
-    </button>
-
-    <a
-        href="{{ url_for('home') }}"
-        class="clear-filter"
-    >
-        Clear
-    </a>
-
-</form>
+            <input
+                type="text"
+                name="search"
+                placeholder="Search category or description..."
+                value="{{ search }}"
+            >
 
 
-        <!-- =========================
-             RECENT TRANSACTIONS
-        ========================== -->
+            <!-- TYPE -->
+
+            <select name="type">
+
+                <option value="">
+                    All Types
+                </option>
+
+
+                <option
+                    value="income"
+                    {% if selected_type == "income" %}
+                    selected
+                    {% endif %}
+                >
+                    Income
+                </option>
+
+
+                <option
+                    value="expense"
+                    {% if selected_type == "expense" %}
+                    selected
+                    {% endif %}
+                >
+                    Expense
+                </option>
+
+            </select>
+
+
+            <!-- CATEGORY -->
+
+            <select name="category">
+
+                <option value="">
+                    All Categories
+                </option>
+
+
+                {% for category in categories %}
+
+                <option
+                    value="{{ category }}"
+                    {% if selected_category|lower == category|lower %}
+                    selected
+                    {% endif %}
+                >
+                    {{ category }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <!-- START DATE -->
+
+            <input
+                type="date"
+                name="start_date"
+                value="{{ start_date }}"
+                title="Start date"
+            >
+
+
+            <!-- END DATE -->
+
+            <input
+                type="date"
+                name="end_date"
+                value="{{ end_date }}"
+                title="End date"
+            >
+
+
+            <!-- FILTER BUTTON -->
+
+            <button type="submit">
+                Filter
+            </button>
+
+
+            <!-- CLEAR FILTER -->
+
+            <a
+                href="{{ url_for('home') }}"
+                class="clear-filter"
+            >
+                Clear
+            </a>
+
+
+            <!-- DOWNLOAD STATEMENT -->
+
+            <a
+                href="{{ url_for(
+                    'download_statement',
+                    search=search,
+                    type=selected_type,
+                    category=selected_category,
+                    start_date=start_date,
+                    end_date=end_date
+                ) }}"
+                class="download-button"
+            >
+                Download Statement
+            </a>
+
+        </form>
+
+
+
+        <!-- RECENT TRANSACTIONS -->
 
         <h2 class="section-title">
             Recent Transactions
@@ -290,8 +406,6 @@
 
                         <td class="actions">
 
-                            <!-- EDIT -->
-
                             <a
                                 href="{{ url_for(
                                     'edit_transaction',
@@ -303,15 +417,17 @@
                             </a>
 
 
-                            <!-- DELETE -->
-
                             <form
                                 action="{{ url_for(
                                     'delete_transaction',
                                     transaction_id=transaction[0]
                                 ) }}"
                                 method="POST"
-                                onsubmit="return confirm('Are you sure you want to delete this transaction?');"
+                                onsubmit="
+                                    return confirm(
+                                        'Are you sure you want to delete this transaction?'
+                                    );
+                                "
                             >
 
                                 <button
@@ -327,6 +443,20 @@
 
                     </tr>
 
+
+                    {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="empty-message"
+                        >
+                            No transactions found.
+                        </td>
+
+                    </tr>
+
                     {% endfor %}
 
                 </tbody>
@@ -335,51 +465,127 @@
 
         </div>
 
+
+
+        <!-- PAGINATION -->
+
+        {% if total_pages > 1 %}
+
+        <div class="pagination">
+
+
+            {% if current_page > 1 %}
+
+            <a
+                href="{{ url_for(
+                    'home',
+                    page=current_page - 1,
+                    search=search,
+                    type=selected_type,
+                    category=selected_category,
+                    start_date=start_date,
+                    end_date=end_date
+                ) }}"
+                class="page-button"
+            >
+                Previous
+            </a>
+
+            {% endif %}
+
+
+
+            {% for page_number in range(1, total_pages + 1) %}
+
+            <a
+                href="{{ url_for(
+                    'home',
+                    page=page_number,
+                    search=search,
+                    type=selected_type,
+                    category=selected_category,
+                    start_date=start_date,
+                    end_date=end_date
+                ) }}"
+                class="page-button {% if page_number == current_page %}active-page{% endif %}"
+            >
+                {{ page_number }}
+            </a>
+
+            {% endfor %}
+
+
+
+            {% if current_page < total_pages %}
+
+            <a
+                href="{{ url_for(
+                    'home',
+                    page=current_page + 1,
+                    search=search,
+                    type=selected_type,
+                    category=selected_category,
+                    start_date=start_date,
+                    end_date=end_date
+                ) }}"
+                class="page-button"
+            >
+                Next
+            </a>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+
+        <p class="transaction-count">
+
+            {{ total_transactions }}
+
+            transaction{% if total_transactions != 1 %}s{% endif %}
+
+            found
+
+        </p>
+
+
     </div>
 
 
 
-    <!-- =========================
-         JAVASCRIPT
-    ========================== -->
+    <!-- JAVASCRIPT -->
 
     <script>
 
-        /*
-        --------------------------------
-        LIGHT / DARK MODE
-        --------------------------------
-        */
+        // DARK / LIGHT MODE
 
         const toggleButton =
             document.getElementById("theme-toggle");
 
 
-        // Check whether dark mode was previously selected
-        const savedTheme =
-            localStorage.getItem("theme");
+        if (
+            localStorage.getItem("theme") === "dark"
+        ) {
 
+            document.body.classList.add(
+                "dark-mode"
+            );
 
-        if (savedTheme === "dark") {
-
-            document.body.classList.add("dark-mode");
-
-            toggleButton.textContent = "Light Mode";
+            toggleButton.textContent =
+                "Light Mode";
 
         }
 
 
 
-        /*
-        --------------------------------
-        CHART COLOURS
-        --------------------------------
-        */
-
         function getChartTextColor() {
 
             if (
-                document.body.classList.contains("dark-mode")
+                document.body.classList.contains(
+                    "dark-mode"
+                )
             ) {
 
                 return "#f9fafb";
@@ -391,10 +597,13 @@
         }
 
 
+
         function getChartGridColor() {
 
             if (
-                document.body.classList.contains("dark-mode")
+                document.body.classList.contains(
+                    "dark-mode"
+                )
             ) {
 
                 return "#374151";
@@ -407,11 +616,7 @@
 
 
 
-        /*
-        --------------------------------
-        DATA FROM FLASK
-        --------------------------------
-        */
+        // DATA FROM FLASK
 
         const categoryLabels =
             {{ category_labels | default([]) | tojson }};
@@ -434,58 +639,66 @@
 
 
 
-        /*
-        --------------------------------
-        SPENDING BY CATEGORY CHART
-        --------------------------------
-        */
+        // SPENDING CHART
 
         const spendingCanvas =
-            document.getElementById("spendingChart");
+            document.getElementById(
+                "spendingChart"
+            );
 
 
         const spendingChart =
-            new Chart(spendingCanvas, {
+            new Chart(
+                spendingCanvas,
+                {
 
-                type: "doughnut",
+                    type: "doughnut",
 
-                data: {
+                    data: {
 
-                    labels: categoryLabels,
+                        labels:
+                            categoryLabels,
 
-                    datasets: [
+                        datasets: [
 
-                        {
+                            {
 
-                            label: "Spending",
+                                label:
+                                    "Spending",
 
-                            data: categoryValues
+                                data:
+                                    categoryValues
 
-                        }
+                            }
 
-                    ]
+                        ]
 
-                },
+                    },
 
 
-                options: {
+                    options: {
 
-                    responsive: true,
+                        responsive: true,
 
-                    maintainAspectRatio: true,
+                        maintainAspectRatio: true,
 
-                    plugins: {
 
-                        legend: {
+                        plugins: {
 
-                            position: "bottom",
+                            legend: {
 
-                            labels: {
+                                position:
+                                    "bottom",
 
-                                color:
-                                    getChartTextColor(),
+                                labels: {
 
-                                padding: 20
+                                    color:
+                                        getChartTextColor(),
+
+                                    padding:
+                                        20
+
+                                }
 
                             }
 
@@ -494,119 +707,129 @@
                     }
 
                 }
-
-            });
-
+            );
 
 
-        /*
-        --------------------------------
-        MONTHLY INCOME VS EXPENSE CHART
-        --------------------------------
-        */
+
+        // MONTHLY CHART
 
         const monthlyCanvas =
-            document.getElementById("monthlyChart");
+            document.getElementById(
+                "monthlyChart"
+            );
 
 
         const monthlyChart =
-            new Chart(monthlyCanvas, {
+            new Chart(
+                monthlyCanvas,
+                {
 
-                type: "bar",
+                    type: "bar",
 
-                data: {
+                    data: {
 
-                    labels: monthLabels,
+                        labels:
+                            monthLabels,
 
-                    datasets: [
+                        datasets: [
 
-                        {
+                            {
 
-                            label: "Income",
+                                label:
+                                    "Income",
 
-                            data: monthlyIncome
-
-                        },
-
-
-                        {
-
-                            label: "Expenses",
-
-                            data: monthlyExpenses
-
-                        }
-
-                    ]
-
-                },
-
-
-                options: {
-
-                    responsive: true,
-
-                    maintainAspectRatio: true,
-
-
-                    scales: {
-
-                        x: {
-
-                            ticks: {
-
-                                color:
-                                    getChartTextColor()
+                                data:
+                                    monthlyIncome
 
                             },
 
-                            grid: {
 
-                                color:
-                                    getChartGridColor()
+                            {
+
+                                label:
+                                    "Expenses",
+
+                                data:
+                                    monthlyExpenses
 
                             }
 
-                        },
+                        ]
+
+                    },
 
 
-                        y: {
+                    options: {
 
-                            beginAtZero: true,
+                        responsive:
+                            true,
 
-                            ticks: {
+                        maintainAspectRatio:
+                            true,
 
-                                color:
-                                    getChartTextColor(),
 
-                                callback: function(value) {
+                        scales: {
 
-                                    return "£" + value;
+                            x: {
+
+                                ticks: {
+
+                                    color:
+                                        getChartTextColor()
+
+                                },
+
+                                grid: {
+
+                                    color:
+                                        getChartGridColor()
 
                                 }
 
                             },
 
-                            grid: {
 
-                                color:
-                                    getChartGridColor()
+                            y: {
+
+                                beginAtZero:
+                                    true,
+
+                                ticks: {
+
+                                    color:
+                                        getChartTextColor(),
+
+                                    callback:
+                                        function(value) {
+
+                                            return "£" + value;
+
+                                        }
+
+                                },
+
+                                grid: {
+
+                                    color:
+                                        getChartGridColor()
+
+                                }
 
                             }
 
-                        }
-
-                    },
+                        },
 
 
-                    plugins: {
+                        plugins: {
 
-                        legend: {
+                            legend: {
 
-                            labels: {
+                                labels: {
 
-                                color:
-                                    getChartTextColor()
+                                    color:
+                                        getChartTextColor()
+
+                                }
 
                             }
 
@@ -615,16 +838,11 @@
                     }
 
                 }
-
-            });
-
+            );
 
 
-        /*
-        --------------------------------
-        DARK MODE BUTTON
-        --------------------------------
-        */
+
+        // THEME BUTTON
 
         toggleButton.addEventListener(
             "click",
@@ -662,9 +880,7 @@
                 }
 
 
-                /*
-                Update doughnut chart
-                */
+                // Spending chart colours
 
                 spendingChart
                     .options
@@ -678,10 +894,7 @@
                 spendingChart.update();
 
 
-
-                /*
-                Update monthly chart
-                */
+                // Monthly chart colours
 
                 monthlyChart
                     .options
