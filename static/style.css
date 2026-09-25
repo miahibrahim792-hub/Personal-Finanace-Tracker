@@ -2,52 +2,112 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f6f8;
     margin: 0;
-    padding: 40px;
+    padding: 0;
+    color: #222222;
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
+    padding: 40px 20px;
 }
 
 h1 {
+    font-size: 36px;
     margin-bottom: 30px;
 }
 
+.section-title {
+    margin-top: 40px;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
 .summary-cards {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
 .card {
     background-color: white;
     padding: 25px;
-    border-radius: 12px;
-    flex: 1;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
 }
 
 .card h2 {
     margin-top: 0;
-    font-size: 18px;
+    font-size: 17px;
+    color: #666666;
 }
 
 .card p {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: bold;
     margin-bottom: 0;
 }
 
-.section-title {
-    margin-top: 40px;
-    margin-bottom: 15px;
+.summary-cards .card:nth-child(1) p {
+    color: #1f2937;
+}
+
+.summary-cards .card:nth-child(2) p {
+    color: #16a34a;
+}
+
+.summary-cards .card:nth-child(3) p {
+    color: #dc2626;
+}
+
+.transaction-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 2fr auto;
+    gap: 12px;
+
+    background-color: white;
+    padding: 20px;
+    border-radius: 14px;
+
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+.transaction-form input,
+.transaction-form select {
+    padding: 12px;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.transaction-form input:focus,
+.transaction-form select:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.transaction-form button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+
+    background-color: #2563eb;
+    color: white;
+
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.transaction-form button:hover {
+    opacity: 0.9;
 }
 
 .table-container {
     background-color: white;
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
 }
 
 table {
@@ -57,43 +117,22 @@ table {
 
 th,
 td {
-    padding: 15px;
+    padding: 16px;
     text-align: left;
     border-bottom: 1px solid #eeeeee;
 }
 
 th {
-    background-color: #f8f9fa;
+    background-color: #f8fafc;
+    font-size: 14px;
+}
+
+tbody tr:hover {
+    background-color: #f9fafb;
 }
 
 tbody tr:last-child td {
     border-bottom: none;
-}
-
-.transaction-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 2fr auto;
-    gap: 10px;
-    background-color: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.transaction-form input,
-.transaction-form select {
-    padding: 12px;
-    border: 1px solid #dddddd;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.transaction-form button {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
 }
 
 .actions {
@@ -106,10 +145,138 @@ tbody tr:last-child td {
     text-decoration: none;
     padding: 8px 12px;
     border-radius: 6px;
-    background-color: #eeeeee;
-    color: #333333;
+
+    background-color: #e5e7eb;
+    color: #111827;
+
+    font-size: 14px;
 }
 
 .edit-button:hover {
-    opacity: 0.8;
+    background-color: #d1d5db;
+}
+
+.delete-button {
+    background-color: #dc2626;
+    color: white;
+
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.delete-button:hover {
+    background-color: #b91c1c;
+}
+
+@media (max-width: 850px) {
+
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .transaction-form {
+        grid-template-columns: 1fr;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.top-bar h1 {
+    margin-bottom: 0;
+}
+
+.theme-toggle {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #111827;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.theme-toggle:hover {
+    opacity: 0.9;
+}
+
+/* Dark Mode */
+
+body.dark-mode {
+    background-color: #111827;
+    color: #f9fafb;
+}
+
+body.dark-mode .card {
+    background-color: #1f2937;
+}
+
+body.dark-mode .card h2 {
+    color: #d1d5db;
+}
+
+body.dark-mode .summary-cards .card:nth-child(1) p {
+    color: #f9fafb;
+}
+
+body.dark-mode .transaction-form {
+    background-color: #1f2937;
+}
+
+body.dark-mode .transaction-form input,
+body.dark-mode .transaction-form select {
+    background-color: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
+
+body.dark-mode .transaction-form input::placeholder {
+    color: #9ca3af;
+}
+
+body.dark-mode .table-container {
+    background-color: #1f2937;
+}
+
+body.dark-mode table {
+    color: #f9fafb;
+}
+
+body.dark-mode th {
+    background-color: #374151;
+    color: #f9fafb;
+}
+
+body.dark-mode td {
+    border-bottom-color: #374151;
+}
+
+body.dark-mode tbody tr:hover {
+    background-color: #2b3545;
+}
+
+body.dark-mode .theme-toggle {
+    background-color: #f9fafb;
+    color: #111827;
+}
+
+body.dark-mode .edit-button {
+    background-color: #4b5563;
+    color: white;
+}
+
+body.dark-mode .edit-button:hover {
+    background-color: #6b7280;
 }
