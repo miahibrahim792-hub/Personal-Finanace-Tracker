@@ -38,15 +38,50 @@ def home():
     """)
 
     transactions = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT LOWER(TRIM(category)), SUM(amount)
+        FROM transactions
+        WHERE type = 'expense'
+        GROUP BY LOWER(TRIM(category))
+        ORDER BY SUM(amount) DESC
+    """)
+
+    category_data = cursor.fetchall()
+
+    category_labels = [row[0].title() for row in category_data]
+    category_values = [row[1] for row in category_data]
+
+    cursor.execute("""
+    SELECT
+        strftime('%Y-%m', timestamp) AS month,
+        SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END),
+        SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END)
+    FROM transactions
+    GROUP BY month
+    ORDER BY month
+    """)
+
+    monthly_data = cursor.fetchall()
+
+    month_labels = [row[0] for row in monthly_data]
+    monthly_income = [row[1] for row in monthly_data]
+    monthly_expenses = [row[2] for row in monthly_data]
+
     connection.close()
 
     return render_template(
-    "dashboard.html",
-    balance=balance,
-    total_income=total_income,
-    total_expense=total_expense,
-    transactions=transactions
-)
+        "dashboard.html",
+        balance=balance,
+        total_income=total_income,
+        total_expense=total_expense,
+        transactions=transactions,
+        category_labels=category_labels,
+        category_values=category_values,
+        month_labels=month_labels,
+        monthly_income=monthly_income,
+        monthly_expenses=monthly_expenses
+    )
 
 @app.route("/add", methods=["POST"])
 def add_transaction():

@@ -7,22 +7,43 @@
 
     <title>Personal Finance Tracker</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 
 <body>
 
     <div class="container">
 
+        <!-- =========================
+             TOP BAR
+        ========================== -->
+
         <div class="top-bar">
+
             <h1>Personal Finance Tracker</h1>
 
-            <button id="theme-toggle" class="theme-toggle">
+            <button
+                id="theme-toggle"
+                class="theme-toggle"
+                type="button"
+            >
                 Dark Mode
             </button>
+
         </div>
 
-        <!-- Summary Cards -->
+
+        <!-- =========================
+             SUMMARY CARDS
+        ========================== -->
+
         <div class="summary-cards">
 
             <div class="card">
@@ -42,15 +63,63 @@
 
         </div>
 
-        <!-- Add Transaction -->
-        <h2 class="section-title">Add Transaction</h2>
 
-        <form action="/add" method="POST" class="transaction-form">
+        <!-- =========================
+             SPENDING BY CATEGORY
+        ========================== -->
+
+        <h2 class="section-title">
+            Spending by Category
+        </h2>
+
+        <div class="card chart-card">
+
+            <canvas id="spendingChart"></canvas>
+
+        </div>
+
+
+        <!-- =========================
+             MONTHLY ANALYTICS
+        ========================== -->
+
+        <h2 class="section-title">
+            Monthly Income vs Expenses
+        </h2>
+
+        <div class="card monthly-chart-card">
+
+            <canvas id="monthlyChart"></canvas>
+
+        </div>
+
+
+        <!-- =========================
+             ADD TRANSACTION
+        ========================== -->
+
+        <h2 class="section-title">
+            Add Transaction
+        </h2>
+
+        <form
+            action="/add"
+            method="POST"
+            class="transaction-form"
+        >
 
             <select name="type" required>
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
+
+                <option value="expense">
+                    Expense
+                </option>
+
+                <option value="income">
+                    Income
+                </option>
+
             </select>
+
 
             <input
                 type="number"
@@ -61,6 +130,7 @@
                 required
             >
 
+
             <input
                 type="text"
                 name="category"
@@ -68,11 +138,13 @@
                 required
             >
 
+
             <input
                 type="text"
                 name="description"
                 placeholder="Description"
             >
+
 
             <button type="submit">
                 Add Transaction
@@ -80,23 +152,40 @@
 
         </form>
 
-        <!-- Recent Transactions -->
-        <h2 class="section-title">Recent Transactions</h2>
+
+        <!-- =========================
+             RECENT TRANSACTIONS
+        ========================== -->
+
+        <h2 class="section-title">
+            Recent Transactions
+        </h2>
+
 
         <div class="table-container">
 
             <table>
 
                 <thead>
+
                     <tr>
+
                         <th>Type</th>
+
                         <th>Amount</th>
+
                         <th>Category</th>
+
                         <th>Description</th>
+
                         <th>Date</th>
+
                         <th>Action</th>
+
                     </tr>
+
                 </thead>
+
 
                 <tbody>
 
@@ -104,37 +193,64 @@
 
                     <tr>
 
-                        <td>{{ transaction[1].title() }}</td>
+                        <td>
+                            {{ transaction[1].title() }}
+                        </td>
+
 
                         <td>
                             £{{ "%.2f"|format(transaction[2]) }}
                         </td>
 
-                        <td>{{ transaction[3] }}</td>
 
-                        <td>{{ transaction[4] }}</td>
+                        <td>
+                            {{ transaction[3] }}
+                        </td>
 
-                        <td>{{ transaction[5] }}</td>
+
+                        <td>
+                            {{ transaction[4] }}
+                        </td>
+
+
+                        <td>
+                            {{ transaction[5] }}
+                        </td>
+
 
                         <td class="actions">
 
+                            <!-- EDIT -->
+
                             <a
-                                href="{{ url_for('edit_transaction', transaction_id=transaction[0]) }}"
+                                href="{{ url_for(
+                                    'edit_transaction',
+                                    transaction_id=transaction[0]
+                                ) }}"
                                 class="edit-button"
                             >
                                 Edit
                             </a>
 
+
+                            <!-- DELETE -->
+
                             <form
-                                action="{{ url_for('delete_transaction', transaction_id=transaction[0]) }}"
+                                action="{{ url_for(
+                                    'delete_transaction',
+                                    transaction_id=transaction[0]
+                                ) }}"
                                 method="POST"
+                                onsubmit="return confirm('Are you sure you want to delete this transaction?');"
                             >
+
                                 <button
                                     type="submit"
                                     class="delete-button"
                                 >
                                     Delete
                                 </button>
+
                             </form>
 
                         </td>
@@ -151,25 +267,402 @@
 
     </div>
 
-    <script>
-        const toggleButton = document.getElementById("theme-toggle");
 
-        if (localStorage.getItem("theme") === "dark") {
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        /*
+        --------------------------------
+        LIGHT / DARK MODE
+        --------------------------------
+        */
+
+        const toggleButton =
+            document.getElementById("theme-toggle");
+
+
+        // Check whether dark mode was previously selected
+        const savedTheme =
+            localStorage.getItem("theme");
+
+
+        if (savedTheme === "dark") {
+
             document.body.classList.add("dark-mode");
+
             toggleButton.textContent = "Light Mode";
+
         }
 
-        toggleButton.addEventListener("click", function () {
-            document.body.classList.toggle("dark-mode");
 
-            if (document.body.classList.contains("dark-mode")) {
-                toggleButton.textContent = "Light Mode";
-                localStorage.setItem("theme", "dark");
-            } else {
-                toggleButton.textContent = "Dark Mode";
-                localStorage.setItem("theme", "light");
+
+        /*
+        --------------------------------
+        CHART COLOURS
+        --------------------------------
+        */
+
+        function getChartTextColor() {
+
+            if (
+                document.body.classList.contains("dark-mode")
+            ) {
+
+                return "#f9fafb";
+
             }
-        });
+
+            return "#222222";
+
+        }
+
+
+        function getChartGridColor() {
+
+            if (
+                document.body.classList.contains("dark-mode")
+            ) {
+
+                return "#374151";
+
+            }
+
+            return "#e5e7eb";
+
+        }
+
+
+
+        /*
+        --------------------------------
+        DATA FROM FLASK
+        --------------------------------
+        */
+
+        const categoryLabels =
+            {{ category_labels | default([]) | tojson }};
+
+
+        const categoryValues =
+            {{ category_values | default([]) | tojson }};
+
+
+        const monthLabels =
+            {{ month_labels | default([]) | tojson }};
+
+
+        const monthlyIncome =
+            {{ monthly_income | default([]) | tojson }};
+
+
+        const monthlyExpenses =
+            {{ monthly_expenses | default([]) | tojson }};
+
+
+
+        /*
+        --------------------------------
+        SPENDING BY CATEGORY CHART
+        --------------------------------
+        */
+
+        const spendingCanvas =
+            document.getElementById("spendingChart");
+
+
+        const spendingChart =
+            new Chart(spendingCanvas, {
+
+                type: "doughnut",
+
+                data: {
+
+                    labels: categoryLabels,
+
+                    datasets: [
+
+                        {
+
+                            label: "Spending",
+
+                            data: categoryValues
+
+                        }
+
+                    ]
+
+                },
+
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: true,
+
+                    plugins: {
+
+                        legend: {
+
+                            position: "bottom",
+
+                            labels: {
+
+                                color:
+                                    getChartTextColor(),
+
+                                padding: 20
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            });
+
+
+
+        /*
+        --------------------------------
+        MONTHLY INCOME VS EXPENSE CHART
+        --------------------------------
+        */
+
+        const monthlyCanvas =
+            document.getElementById("monthlyChart");
+
+
+        const monthlyChart =
+            new Chart(monthlyCanvas, {
+
+                type: "bar",
+
+                data: {
+
+                    labels: monthLabels,
+
+                    datasets: [
+
+                        {
+
+                            label: "Income",
+
+                            data: monthlyIncome
+
+                        },
+
+
+                        {
+
+                            label: "Expenses",
+
+                            data: monthlyExpenses
+
+                        }
+
+                    ]
+
+                },
+
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: true,
+
+
+                    scales: {
+
+                        x: {
+
+                            ticks: {
+
+                                color:
+                                    getChartTextColor()
+
+                            },
+
+                            grid: {
+
+                                color:
+                                    getChartGridColor()
+
+                            }
+
+                        },
+
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            ticks: {
+
+                                color:
+                                    getChartTextColor(),
+
+                                callback: function(value) {
+
+                                    return "£" + value;
+
+                                }
+
+                            },
+
+                            grid: {
+
+                                color:
+                                    getChartGridColor()
+
+                            }
+
+                        }
+
+                    },
+
+
+                    plugins: {
+
+                        legend: {
+
+                            labels: {
+
+                                color:
+                                    getChartTextColor()
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            });
+
+
+
+        /*
+        --------------------------------
+        DARK MODE BUTTON
+        --------------------------------
+        */
+
+        toggleButton.addEventListener(
+            "click",
+            function () {
+
+                document.body.classList.toggle(
+                    "dark-mode"
+                );
+
+
+                if (
+                    document.body.classList.contains(
+                        "dark-mode"
+                    )
+                ) {
+
+                    toggleButton.textContent =
+                        "Light Mode";
+
+                    localStorage.setItem(
+                        "theme",
+                        "dark"
+                    );
+
+                } else {
+
+                    toggleButton.textContent =
+                        "Dark Mode";
+
+                    localStorage.setItem(
+                        "theme",
+                        "light"
+                    );
+
+                }
+
+
+                /*
+                Update doughnut chart
+                */
+
+                spendingChart
+                    .options
+                    .plugins
+                    .legend
+                    .labels
+                    .color =
+                    getChartTextColor();
+
+
+                spendingChart.update();
+
+
+
+                /*
+                Update monthly chart
+                */
+
+                monthlyChart
+                    .options
+                    .plugins
+                    .legend
+                    .labels
+                    .color =
+                    getChartTextColor();
+
+
+                monthlyChart
+                    .options
+                    .scales
+                    .x
+                    .ticks
+                    .color =
+                    getChartTextColor();
+
+
+                monthlyChart
+                    .options
+                    .scales
+                    .y
+                    .ticks
+                    .color =
+                    getChartTextColor();
+
+
+                monthlyChart
+                    .options
+                    .scales
+                    .x
+                    .grid
+                    .color =
+                    getChartGridColor();
+
+
+                monthlyChart
+                    .options
+                    .scales
+                    .y
+                    .grid
+                    .color =
+                    getChartGridColor();
+
+
+                monthlyChart.update();
+
+            }
+        );
+
     </script>
 
 </body>

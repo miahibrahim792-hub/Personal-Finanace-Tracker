@@ -280,3 +280,14 @@ body.dark-mode .edit-button {
 body.dark-mode .edit-button:hover {
     background-color: #6b7280;
 }
+
+.chart-card {
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.monthly-chart-card {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 25px;
+}
